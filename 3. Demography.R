@@ -45,7 +45,7 @@ tab_FT0_BM <- CreateTableOne(vars = myvar_FT, strata = "delivery_mode", data = m
 sepline_FT0_BM <- print(tab_FT0_BM, showAllLevels = TRUE, exact = nonvar,quote = TRUE, noSpaces = TRUE, printToggle = FALSE)
 
 tab_FT1_BM <- CreateTableOne(vars = myvar_FT, strata = "delivery_mode", data = metadata_FT1, factorVars = catvar)
-sepline_FT1 <- print(tab_FT1_BM, showAllLevels = TRUE, exact = nonvar,quote = TRUE, noSpaces = TRUE, printToggle = FALSE)
+sepline_FT1_BM <- print(tab_FT1_BM, showAllLevels = TRUE, exact = nonvar,quote = TRUE, noSpaces = TRUE, printToggle = FALSE)
 
 tab_FT2_BM <- CreateTableOne(vars = myvar_FT, strata = "delivery_mode", data = metadata_FT2, factorVars = catvar)
 sepline_FT2_BM <- print(tab_FT2_BM, showAllLevels = TRUE, exact = nonvar,quote = TRUE, noSpaces = TRUE, printToggle = FALSE)
@@ -54,20 +54,3 @@ sepline_FT2_BM <- print(tab_FT2_BM, showAllLevels = TRUE, exact = nonvar,quote =
 probiotics_infant <- select(metadata_rarefied, record_id, hospital_catch, probiotics_before)
 probiotics_infant <- probiotics_infant[!duplicated(probiotics_infant$record_id),]
 table(probiotics_infant$hospital_catch,probiotics_infant$probiotics_before)
-
-#############################################################################db-rda
-##################################### Supplementary Table 3 rb-rda
-otu_FT0 <- t(as.data.frame(otu_table(ps_FT0)))
-env_FT0 <- subset(metadata_FT0,select=c(fortification, GA, SGA, delivery_mode, DOL, hospital_catch, antibiotics))
-rda_FT0 <- capscale(otu_FT0~., env_FT0, dist="bray", add=TRUE)
-dbanov_FT0 <- anova.cca(rda_FT0, by="term", permutations = 999)
-
-otu_FT1 <- t(as.data.frame(otu_table(ps_FT1)))
-env_FT1 <- subset(metadata_FT1,select=c(fortification, GA, SGA, delivery_mode, DOL, hospital_catch, antibiotics))
-rda_FT1 <- capscale(otu_FT1~., env_FT1, dist="bray", add=TRUE)
-dbanov_FT1 <- anova.cca(rda_FT1, by="term", permutations = 999)
-
-otu_FT2 <- t(as.data.frame(otu_table(ps_FT2)))
-env_FT2 <- subset(metadata_FT2,select=c(fortification, GA, SGA, delivery_mode, DOL, hospital_catch, antibiotics))
-rda_FT2 <- capscale(otu_FT2~., env_FT2, dist="bray", add=TRUE)
-dbanov_FT2 <- anova.cca(rda_FT2, by="term", permutations = 999)
