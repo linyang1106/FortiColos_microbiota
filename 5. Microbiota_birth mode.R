@@ -11,11 +11,11 @@ rich_1 <- subset(rich_full, FT == "1")
 rich_2 <- subset(rich_full, FT == "2")
 
 # Shannon index
-lm_shannon0 <- lm(Shannon~ fortification + delivery_mode + hospital_catch + GA + DOL + SGA + antibiotics, rich_FT0)
+lm_shannon0 <- lm(Shannon~ fortification + birth_mode + hospital + GA + DOL + SGA + antibiotics, rich_0)
 shannon0 <- as.data.frame(tidy(lm_shannon0))
-lm_shannon1 <- lm(Shannon~ fortification + delivery_mode + hospital_catch + GA + DOL + SGA + antibiotics, rich_FT1)
+lm_shannon1 <- lm(Shannon~ fortification + birth_mode + hospital + GA + DOL + SGA + antibiotics, rich_1)
 shannon1 <- as.data.frame(tidy(lm_shannon1))
-lm_shannon2 <- lm(Shannon~fortification + delivery_mode + hospital_catch + GA + DOL + SGA + antibiotics, rich_FT2)
+lm_shannon2 <- lm(Shannon~fortification + birth_mode + hospital + GA + DOL + SGA + antibiotics, rich_2)
 shannon2 <- as.data.frame(tidy(lm_shannon2))
 BM <- data.frame(group1 = c("C","C","C"), group2=c("V", "V", "V"))
 shannon_BM <- as.data.frame(rbind(shannon0[2,],shannon1[2,],shannon2[2,]))
@@ -25,11 +25,11 @@ shannon_BM <- cbind(BM,shannon_BM)
 print(shannon_BM, quote = TRUE, noSpaces = TRUE, printToggle = FALSE)
 
 # Observed zOTUs
-lm_observed0 <- lm(Observed~fortification + delivery_mode + hospital_catch + GA + DOL + SGA + antibiotics, rich_0)
+lm_observed0 <- lm(Observed~fortification + birth_mode + hospital + GA + DOL + SGA + antibiotics, rich_0)
 observed0 <- as.data.frame(tidy(lm_observed0))
-lm_observed1 <- lm(Observed~fortification  + delivery_mode + hospital_catch + GA + DOL + SGA + antibiotics, rich_1)
+lm_observed1 <- lm(Observed~fortification  + birth_mode + hospital + GA + DOL + SGA + antibiotics, rich_1)
 observed1 <- as.data.frame(tidy(lm_observed1))
-lm_observed2 <- lm(Observed~ fortification  + delivery_mode + hospital_catch + GA + DOL + SGA + antibiotics, rich_2)
+lm_observed2 <- lm(Observed~ fortification  + birth_mode + hospital + GA + DOL + SGA + antibiotics, rich_2)
 observed2 <- as.data.frame(tidy(lm_observed2))
 observed_BM <- as.data.frame(rbind(observed0[2,],observed1[2,],observed2[2,]))
 observed_BM <- observed_BM[,-1]
@@ -43,7 +43,7 @@ adonis <- function(ps, method_c) {
   set.seed(123)
   dist <- phyloseq::distance(ps, method = method_c)
   metadata <- data.frame(sample_data(ps))
-  re_adonis <- adonis2(dist ~ fortification + delivery_mode + hospital_catch + GA + DOL + SGA + antibiotics, data = metadata, permutations = 999, by="margin")
+  re_adonis <- adonis2(dist ~ fortification + birth_mode + hospital + GA + DOL + SGA + antibiotics, data = metadata, permutations = 999, by="margin")
 }
 adonis0w <-adonis(ps_FT0, "Weighted Unifrac")
 adonis0u <-adonis(ps_FT0, "Unweighted Unifrac")
@@ -76,7 +76,7 @@ ps.melt_phylum <- ps.melt_phylum[order(ps.melt_phylum$mean, decreasing = TRUE),]
 ps.melt_phylum <- ps.melt_phylum[!duplicated(ps.melt_phylum$FullID),]
 # change those with the highest abundance value < 50 as mixed type
 ps.melt_phylum$Phylum[ps.melt_phylum$mean < 50] <- "mixed"
-table(ps.melt_phylum$FT,ps.melt_phylum$Phylum,ps.melt_phylum$delivery_mode)
+table(ps.melt_phylum$FT,ps.melt_phylum$Phylum,ps.melt_phylum$birth_mode)
 # add new variable "type"
 for (i in 1:dim(ps.melt_phylum)[1]) {
   if(ps.melt_phylum$Phylum[i] == "Proteobacteria") {ps.melt_phylum$type[i] <- "Proteobacteria"
@@ -86,17 +86,17 @@ for (i in 1:dim(ps.melt_phylum)[1]) {
 }  
 metadata_type <- ps.melt_phylum
 
-#### type and delivery mode
+#### type and birth mode
 library(nnet)
-fitt0 <- multinom(type~delivery_mode, data = subset(metadata_type, FT=="0"))
+fitt0 <- multinom(type~birth_mode, data = subset(metadata_type, FT=="0"))
 summary(fitt0)
 z0 <- summary(fitt0)$ coefficients/summary(fitt0)$standard.errors
 p0 <- (1-pnorm(abs(z0),0,1))*2
-fitt1 <- multinom(type~delivery_mode, data = subset(metadata_type, FT=="1"))
+fitt1 <- multinom(type~birth_mode, data = subset(metadata_type, FT=="1"))
 summary(fitt1)
 z1 <- summary(fitt1)$ coefficients/summary(fitt1)$standard.errors
 p1 <- (1-pnorm(abs(z1),0,1))*2
-fitt2 <- multinom(type~delivery_mode, data = subset(metadata_type, FT=="2"))
+fitt2 <- multinom(type~birth_mode, data = subset(metadata_type, FT=="2"))
 summary(fitt2)
 z2 <- summary(fitt2)$ coefficients/summary(fitt2)$standard.errors
 p2 <- (1-pnorm(abs(z2),0,1))*2
@@ -122,36 +122,36 @@ metadata_type$typef <- as.factor(metadata_type$typef)
 type0 <- subset(metadata_type,FT=="0")
 type1 <- subset(metadata_type,FT=="1")
 type2 <- subset(metadata_type,FT=="2")
-typeCS<- subset(metadata_type, delivery_mode == "C")
-typeVD<- subset(metadata_type, delivery_mode == "V")
+typeCS<- subset(metadata_type, birth_mode == "C")
+typeVD<- subset(metadata_type, birth_mode == "V")
 library(Publish)
 library(nnet)
 #Proteobacteria
-fitp0_p<-glm(typep~delivery_mode + hospital + fortification + GA + DOL + SGA + antibiotics,data = type0, family = "binomial")
+fitp0_p<-glm(typep~birth_mode + hospital + fortification + GA + DOL + SGA + antibiotics,data = type0, family = "binomial")
 publish(fitp0_p)
 proteobacteria0 <- as.data.frame(tidy(fitp0_p))
-fitp1_p<-glm(typep~delivery_mode + hospital + fortification + GA + DOL + SGA + antibiotics,data = type1, family = "binomial")
+fitp1_p<-glm(typep~birth_mode + hospital + fortification + GA + DOL + SGA + antibiotics,data = type1, family = "binomial")
 proteobacteria1 <- as.data.frame(tidy(fitp1_p))
-fitp2_p<-glm(typep~delivery_mode + hospital + fortification + GA + DOL + SGA + antibiotics,data = type2, family = "binomial")
+fitp2_p<-glm(typep~birth_mode + hospital + fortification + GA + DOL + SGA + antibiotics,data = type2, family = "binomial")
 proteobacteria2 <- as.data.frame(tidy(fitp2_p))
-deliverygroup <- data.frame(group1 = c("C","C","C"), group2=c("V", "V", "V"))
+birthgroup <- data.frame(group1 = c("C","C","C"), group2=c("V", "V", "V"))
 proteobacteria_p <- as.data.frame(rbind(proteobacteria0[2,],proteobacteria1[2,],proteobacteria2[2,]))
 proteobacteria_p <- proteobacteria_p[,-1]
 row.names(proteobacteria_p) <- c("FT0","FT1","FT2")
-proteobacteria_p <- cbind(deliverygroup,proteobacteria_p)
+proteobacteria_p <- cbind(birthgroup,proteobacteria_p)
 print(proteobacteria_p, quote = TRUE, noSpaces = TRUE, printToggle = FALSE)
 #Firmicutes
-fitf0_f<-glm(typef~delivery_mode + hospital + fortification + GA + DOL + SGA + antibiotics,data = type0, family = "binomial")
+fitf0_f<-glm(typef~birth_mode + hospital + fortification + GA + DOL + SGA + antibiotics,data = type0, family = "binomial")
 firmicutes0 <- as.data.frame(tidy(fitf0_f))
-fitf1_f<-glm(typef~delivery_mode + hospital + fortification + GA + DOL + SGA + antibiotics,data = type1, family = "binomial")
+fitf1_f<-glm(typef~birth_mode + hospital + fortification + GA + DOL + SGA + antibiotics,data = type1, family = "binomial")
 firmicutes1 <- as.data.frame(tidy(fitf1_f))
-fitf2_f<-glm(typef~delivery_mode + hospital + fortification + GA + DOL + SGA + antibiotics,data = type2, family = "binomial")
+fitf2_f<-glm(typef~birth_mode + hospital + fortification + GA + DOL + SGA + antibiotics,data = type2, family = "binomial")
 firmicutes2 <- as.data.frame(tidy(fitf2_f))
-deliverygroup <- data.frame(group1 = c("C","C","C"), group2=c("V", "V", "V"))
+birthgroup <- data.frame(group1 = c("C","C","C"), group2=c("V", "V", "V"))
 firmicutes_p <- as.data.frame(rbind(firmicutes0[2,],firmicutes1[2,],firmicutes2[2,]))
 firmicutes_p <- firmicutes_p[,-1]
 row.names(firmicutes_p) <- c("FT0","FT1","FT2")
-firmicutes_p <- cbind(deliverygroup,firmicutes_p)
+firmicutes_p <- cbind(birthgroup,firmicutes_p)
 print(firmicutes_p, quote = TRUE, noSpaces = TRUE, printToggle = FALSE)
 
 ################################################################### DESeq2, data for figure 2e #################################################################
@@ -167,7 +167,7 @@ ps.sample <- tax_glom(ps.sample, taxrank = "Genus", NArm = FALSE)
 path_table <- "/desep2/"
 dir.create(path_table)
 ps <- ps.sample
-ps.ds <- phyloseq_to_deseq2(ps, ~ hospital_catch + GA + DOL + SGA + antibiotics + fortification + delivery_mode)
+ps.ds <- phyloseq_to_deseq2(ps, ~ hospital + GA + DOL + SGA + antibiotics + fortification + birth_mode)
 ps.ds <-  DESeq(ps.ds, test="Wald", fitType="parametric", sfType="poscounts")
 # result
 res = results(ps.ds, cooksCutoff = FALSE, pAdjustMethod = "none")
@@ -191,8 +191,8 @@ sigtab$Family = factor(as.character(sigtab$Family), levels=names(x))
 x = tapply(sigtab$log2FoldChange, sigtab$Species, function(x) max(x))
 x = sort(x, TRUE)
 # select appearance > 0.5
-ps.sample_C <- prune_samples(sample_data(ps.sample)$delivery_mode %in% "C", ps.sample)
-ps.sample_V<- prune_samples(sample_data(ps.sample)$delivery_mode %in% "V", ps.sample)
+ps.sample_C <- prune_samples(sample_data(ps.sample)$birth_mode %in% "C", ps.sample)
+ps.sample_V<- prune_samples(sample_data(ps.sample)$birth_mode %in% "V", ps.sample)
 ps.sample_C <- prune_taxa(rowSums(otu_table(ps.sample_C) == 0) < ncol(otu_table(ps.sample_C)) * 0.5, ps.sample)
 ps.sample_V <- prune_taxa(rowSums(otu_table(ps.sample_V) == 0) < ncol(otu_table(ps.sample_V)) * 0.5, ps.sample)
 otu.f_C <- data.frame(otu_table(ps.sample_C))
