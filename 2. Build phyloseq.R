@@ -1,10 +1,12 @@
 setwd(dirname(rstudioapi::getActiveDocumentContext()$path))
 source("1. Setup.R")
-########################################################################## build phyloseq
+########################################################################## build phyloseq #############################################################
 
 otu <- read.table(file = "data/zOTU_table_GG.txt", sep = "\t", header = T, row.names = 1, comment.char = "")
-metadata <-mapping_sample <- read.table("data/mapping_sample.txt", sep = "\t", header = T, row.names = 1, comment.char = "")
-
+mapping_sample <- read.table("data/mapping_sample.txt", sep = "\t", header = T, row.names = 1, comment.char = "")
+mapping_sample$FT <- factor(mapping_sample$FT, levels = c("0","1","2"))
+mapping_sample$MMpercent3d <- as.numeric(mapping_sample$MMpercent3d)
+mapping_sample$hospital <- factor(mapping_sample$hospital, levels = c("A","B","F","H","C","D","E","G"))
 # remove unclassified
 otu <- otu[otu$taxonomy != "Unassigned", ]
 
@@ -51,7 +53,7 @@ for (i in 1:nrow(tax)) {
 # build phyloseq object
 OTU <- otu_table(as.matrix(otu), taxa_are_rows = TRUE)
 TAX <- tax_table(as.matrix(tax))
-SAMPLE <- sample_data(metadata)
+SAMPLE <- sample_data(mapping_sample)
 TREE <- read_tree_greengenes("./data/zOTU.tree")
 ## merge the data
 ps <- phyloseq(OTU, TAX, SAMPLE, TREE)
