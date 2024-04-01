@@ -86,6 +86,7 @@ pbox_sta <- ggplot(stapabundance, aes(x = FT, y = Abundance, fill=fortification)
   mytheme_n
 
 #figure 3g
+# reference: https://github.com/jstokholm/rabuplot/
 source("Figure rabuplots_FortiColos.R")
 p_relative_for
 
